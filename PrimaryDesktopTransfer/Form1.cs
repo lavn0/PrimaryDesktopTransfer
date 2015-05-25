@@ -18,6 +18,20 @@ namespace PrimaryDesktopTransfer
 			this.backgroundWorker.RunWorkerAsync();
 		}
 
+		private void Form1_Load(object sender, EventArgs e)
+		{
+			var subdisplay = Screen.AllScreens.FirstOrDefault(s => s != Screen.PrimaryScreen);
+			if (subdisplay != null)
+			{
+				// 最初に見つかったサブディスプレイにフルスクリーン表示
+				this.Left = subdisplay.Bounds.X;
+				this.Top = subdisplay.Bounds.Y;
+				this.WindowState = FormWindowState.Normal;
+				this.FormBorderStyle = FormBorderStyle.None;
+				this.WindowState = FormWindowState.Maximized;
+			}
+		}
+
 		private void Form1_FormClosing(object sender, FormClosingEventArgs e)
 		{
 			this.backgroundWorker.CancelAsync();
@@ -28,12 +42,25 @@ namespace PrimaryDesktopTransfer
 			this.Close();
 		}
 
+		private void Windowモードに切り替えToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			// Windowモードに直してプライマリディスプレイに呼び戻す
+			this.FormBorderStyle = FormBorderStyle.Sizable;
+			this.WindowState = FormWindowState.Normal;
+			this.Left = Screen.PrimaryScreen.Bounds.X;
+			this.Top = Screen.PrimaryScreen.Bounds.Y;
+		}
+
 		private void notifyIcon_Click(object sender, EventArgs e)
 		{
 			this.contextMenuStrip.Items.Clear();
 			var endMenu = new ToolStripMenuItem("終了する");
 			endMenu.Click += this.終了するToolStripMenuItem_Click;
 			this.contextMenuStrip.Items.Add(endMenu);
+
+			var windowModeMenu = new ToolStripMenuItem("Windowモードに切り替え");
+			windowModeMenu.Click += this.Windowモードに切り替えToolStripMenuItem_Click;
+			this.contextMenuStrip.Items.Add(windowModeMenu);
 
 			for (var i = 0; i < Screen.AllScreens.Length; i++)
 			{
