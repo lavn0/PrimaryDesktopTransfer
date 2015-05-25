@@ -18,6 +18,11 @@ namespace PrimaryDesktopTransfer
 			this.backgroundWorker.RunWorkerAsync();
 		}
 
+		private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+		{
+			this.backgroundWorker.CancelAsync();
+		}
+
 		private void 終了するToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			this.Close();
