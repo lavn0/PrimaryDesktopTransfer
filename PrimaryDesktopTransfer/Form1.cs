@@ -1,14 +1,21 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace PrimaryDesktopTransfer
 {
 	public partial class Form1 : Form
 	{
+		private const int IntervalMilliSeconds = 2000;
+
 		public Form1()
 		{
-			InitializeComponent();
+			this.InitializeComponent();
+			this.backgroundWorker.RunWorkerAsync();
 		}
 
 		private void 終了するToolStripMenuItem_Click(object sender, EventArgs e)
@@ -51,6 +58,29 @@ namespace PrimaryDesktopTransfer
 			this.WindowState = FormWindowState.Normal;
 			this.FormBorderStyle = FormBorderStyle.None;
 			this.WindowState = FormWindowState.Maximized;
+		}
+
+		private void backgroundWorker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+		{
+			while (!this.backgroundWorker.CancellationPending)
+			{
+				this.backgroundWorker.ReportProgress(0);
+				Thread.Sleep(IntervalMilliSeconds);
+				Debug.WriteLine(DateTime.Now.TimeOfDay + " while loop.");
+			}
+		}
+
+		private void backgroundWorker_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
+		{
+			var rect = Screen.PrimaryScreen.Bounds;
+
+			// Imageを使いまわさないとメモリ不足に陥り、GDI+ が不明なエラーメッセージの例外を発生させるので注意
+			this.pictureBox1.Image = this.pictureBox1.Image ?? new Bitmap(rect.Width, rect.Height, PixelFormat.Format32bppPArgb);
+
+			using (var g = Graphics.FromImage(this.pictureBox1.Image))
+			{
+				g.CopyFromScreen(rect.X, rect.Y, 0, 0, rect.Size, CopyPixelOperation.SourceCopy);
+			}
 		}
 	}
 }
